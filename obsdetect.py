@@ -4,19 +4,16 @@ import threading
 import pyttsx3
 import numpy as np
 from ultralytics import YOLO
-import winsound  # 🔔 Windows built-in beep
+import winsound  
 
-
-# ----------------- Beep Setup -----------------
 def play_beep():
     """Plays a short beep before voice alert (non-blocking)."""
     def _beep():
-        frequency = 1000  # Hz
-        duration = 200    # milliseconds
+        frequency = 1000  
+        duration = 200   
         winsound.Beep(frequency, duration)
     threading.Thread(target=_beep, daemon=True).start()
 
-# ----------------- TTS Setup -----------------
 def speak(text):
     engine = pyttsx3.init()
     engine.setProperty("rate", 165)
@@ -31,7 +28,6 @@ def alert_user(text):
         speak(text)
     threading.Thread(target=run, daemon=True).start()
 
-# ----------------- Obstacle Helper Functions -----------------
 def get_position(box, width):
     """Return Left / Center / Right based on bounding box center."""
     x1, y1, x2, y2 = box
@@ -66,13 +62,12 @@ def get_alert_interval(box, frame_height):
     else:  # Far
         return 3.0
 
-# ----------------- Main -----------------
+
 def main():
-    # Load YOLO model (Nano = fastest)
     model = YOLO("yolov8n.pt")
 
-    # Use your phone IP Webcam URL here
-    url = "http://10.114.137.85:8080/video"  # 🔴 Replace with your phone's IP Webcam link
+   
+    url = "http://10.114.137.85:8080/video"  
     cap = cv2.VideoCapture(url)
 
     if not cap.isOpened():
@@ -88,12 +83,12 @@ def main():
         if not ret:
             break
 
-        # 🔹 Resize smaller for speed
+        
         frame = cv2.resize(frame, (320,240))
         H, W = frame.shape[:2]
         frame_count += 1
 
-        # Skip frames to reduce lag
+       
         if frame_count % 2 != 0:
             cv2.imshow("Obstacle Detector", frame)
             if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -120,10 +115,10 @@ def main():
                     "suggestion": move
                 })
 
-        # Alert logic
+        
         now = time.time()
         if detections:
-            # Choose largest = closest
+          
             best = max(detections, key=lambda d: (d["xyxy"][3] - d["xyxy"][1]))
             dynamic_interval = get_alert_interval(best["xyxy"], H)
 
